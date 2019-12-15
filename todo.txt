@@ -2,3 +2,6 @@
 - convert board display list to np unicode array
 - add win condition
 - figure out behaviour for loading games and tracking wins
+
+- implement figlet glyphs in seperate file
+- implement hints
