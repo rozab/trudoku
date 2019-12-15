@@ -69,8 +69,18 @@ def highlight_conflicts(board, bad_cells):
 def show_cursor(board, i, j):
     # highlight current cell
     highlight_cell(board, t.yellow, i, j)
+    # highlight other cells with same value
+    target = board_array[j, i]
+    if target:
+        cells = np.argwhere(board_array==target)
+        with t.location(0,0):
+            print(cells)
+        for cell in cells:
+            if (j, i) != tuple(cell):
+                highlight_cell(board, t.magenta, cell[1], cell[0])
 
 def highlight_cell(board, color, i, j):
+    # coords for top left of square
     u, v = i*2, j*4
     # top
     board[u][v+1] = color + board[u][v+1]
@@ -120,7 +130,7 @@ for i in range(9):
         if n != 0: board_display[2*j + 1][4*i + 2] = t.blue(str(n))
 
 with t.fullscreen(), t.hidden_cursor(), t.cbreak():
-    i, j = 1, 3
+    i, j = 0, 0
     val = ""
     while val != 'q':
         draw(i, j)

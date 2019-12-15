@@ -2,6 +2,7 @@
 - convert board display list to np unicode array
 - add win condition
 - figure out behaviour for loading games and tracking wins
-
+- make x, y coords consistent
 - implement figlet glyphs in seperate file
 - implement hints
+- add settings, via flags, rc file and gui
