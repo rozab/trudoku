@@ -2,28 +2,27 @@
 from blessed import Terminal
 import numpy as np
 import signal
-import copy
 
-BLANK_BOARD = """\
-╔═══╤═══╤═══╦═══╤═══╤═══╦═══╤═══╤═══╗
-║   │   │   ║   │   │   ║   │   │   ║
-╟───┼───┼───╫───┼───┼───╫───┼───┼───╢
-║   │   │   ║   │   │   ║   │   │   ║
-╟───┼───┼───╫───┼───┼───╫───┼───┼───╢
-║   │   │   ║   │   │   ║   │   │   ║
-╠═══╪═══╪═══╬═══╪═══╪═══╬═══╪═══╪═══╣
-║   │   │   ║   │   │   ║   │   │   ║
-╟───┼───┼───╫───┼───┼───╫───┼───┼───╢
-║   │   │   ║   │   │   ║   │   │   ║
-╟───┼───┼───╫───┼───┼───╫───┼───┼───╢
-║   │   │   ║   │   │   ║   │   │   ║
-╠═══╪═══╪═══╬═══╪═══╪═══╬═══╪═══╪═══╣
-║   │   │   ║   │   │   ║   │   │   ║
-╟───┼───┼───╫───┼───┼───╫───┼───┼───╢
-║   │   │   ║   │   │   ║   │   │   ║
-╟───┼───┼───╫───┼───┼───╫───┼───┼───╢
-║   │   │   ║   │   │   ║   │   │   ║
-╚═══╧═══╧═══╩═══╧═══╧═══╩═══╧═══╧═══╝"""
+BLANK_BOARD = "\
+╔═══╤═══╤═══╦═══╤═══╤═══╦═══╤═══╤═══╗\
+║   │   │   ║   │   │   ║   │   │   ║\
+╟───┼───┼───╫───┼───┼───╫───┼───┼───╢\
+║   │   │   ║   │   │   ║   │   │   ║\
+╟───┼───┼───╫───┼───┼───╫───┼───┼───╢\
+║   │   │   ║   │   │   ║   │   │   ║\
+╠═══╪═══╪═══╬═══╪═══╪═══╬═══╪═══╪═══╣\
+║   │   │   ║   │   │   ║   │   │   ║\
+╟───┼───┼───╫───┼───┼───╫───┼───┼───╢\
+║   │   │   ║   │   │   ║   │   │   ║\
+╟───┼───┼───╫───┼───┼───╫───┼───┼───╢\
+║   │   │   ║   │   │   ║   │   │   ║\
+╠═══╪═══╪═══╬═══╪═══╪═══╬═══╪═══╪═══╣\
+║   │   │   ║   │   │   ║   │   │   ║\
+╟───┼───┼───╫───┼───┼───╫───┼───┼───╢\
+║   │   │   ║   │   │   ║   │   │   ║\
+╟───┼───┼───╫───┼───┼───╫───┼───┼───╢\
+║   │   │   ║   │   │   ║   │   │   ║\
+╚═══╧═══╧═══╩═══╧═══╧═══╩═══╧═══╧═══╝"
 
 # Lists of lists of tuples, containing coords of cells to check in each group
 ROW_GROUPS = [ [(i,j) for j in range(9)] for i in range(9)]
@@ -61,35 +60,36 @@ def check():
                 bad_cells.add(cell)
     return bad_cells
 
-def highlight_board(board, bad_cells):
-    hboard = copy.deepcopy(board)
+def highlight_conflicts(board, bad_cells):
     for i, j in bad_cells:
-        line = hboard[2*j + 1]
-        hboard[2*j + 1] = line[:4*i+2] + [t.bold_red(line[4*i+2])] + line[4*i+3:]
-    return hboard
+        # override other styling
+        val = str(board_array[i,j])
+        board[2*j + 1][4*i + 2] = t.bold_red(val)
 
 def show_cursor(board, i, j):
-    cboard = copy.deepcopy(board)
+    # highlight current cell
+    highlight_cell(board, t.yellow, i, j)
+
+def highlight_cell(board, color, i, j):
     u, v = i*2, j*4
     # top
-    cboard[u][v+1] = t.yellow + cboard[u][v+1]
-    cboard[u][v+3] += t.normal
+    board[u][v+1] = color + board[u][v+1]
+    board[u][v+3] += t.normal
     #sides
-    cboard[u+1][v] = t.yellow(cboard[u+1][v])
-    cboard[u+1][v+4] = t.yellow(cboard[u+1][v+4])
+    board[u+1][v] = color(board[u+1][v])
+    board[u+1][v+4] = color(board[u+1][v+4])
     # bottom
-    cboard[u+2][v+1] = t.yellow + cboard[u+2][v+1]
-    cboard[u+2][v+3] += t.normal
-
-    return cboard
+    board[u+2][v+1] = color + board[u+2][v+1]
+    board[u+2][v+3] += t.normal
 
 def draw(i,j):
     width, height = t.width, t.height
     hgap = (width - 37) // 2
     vgap = (height - 19) // 2
-    hboard = highlight_board(board_display, check())
-    hboard_with_cursor = show_cursor(hboard, i, j)
-    lines = ["".join(l) for l in hboard_with_cursor]
+    colored_board = board_display.copy()
+    highlight_conflicts(colored_board, check())
+    show_cursor(colored_board, i, j)
+    lines = ["".join(l) for l in colored_board]
 
     t.clear()
     for i, l in enumerate(lines):
@@ -108,12 +108,11 @@ def move_cursor(val, i,j):
 
 
 t = Terminal()
-#board_array = np.zeros([9,9], dtype=int)
+
 puzzle_array = np.fromiter(PUZZLE, dtype=int).reshape([9,9]).T
 board_array = puzzle_array.copy()
 
-# TODO: change to numpy unicode array
-board_display = [list(l) for l in BLANK_BOARD.splitlines()]
+board_display = np.array(list(BLANK_BOARD), dtype="U16").reshape([19,37])
 
 for i in range(9):
     for j in range(9):
