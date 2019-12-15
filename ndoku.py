@@ -31,7 +31,7 @@ COLUMN_GROUPS = [ [(i,j) for i in range(9)] for j in range(9)]
 BOX_GROUPS = [ [(i*3 + u,j*3 + v) for u in range(3) for v in range(3)] for i in range(3) for j in range(3)]
 ALL_GROUPS = ROW_GROUPS + COLUMN_GROUPS + BOX_GROUPS
 
-PUZZLE = "016400000200009000400000062070230100100000003003087040960000005000800007000006820"
+PUZZLE = "002000500010705020400090007049000730801030409036000210200080004080902060007000800"
 
 
 def set_cell(n, i, j):
@@ -109,7 +109,7 @@ def move_cursor(val, i,j):
 
 t = Terminal()
 #board_array = np.zeros([9,9], dtype=int)
-puzzle_array = np.fromiter(PUZZLE, dtype=int).reshape([9,9])
+puzzle_array = np.fromiter(PUZZLE, dtype=int).reshape([9,9]).T
 board_array = puzzle_array.copy()
 
 # TODO: change to numpy unicode array
@@ -137,3 +137,5 @@ with t.fullscreen(), t.hidden_cursor(), t.cbreak():
             j = min(j+1, 8)
         elif val in "0123456789":
             set_cell(int(val), j, i)
+        elif val == "c":
+            set_cell(0, j, i)
