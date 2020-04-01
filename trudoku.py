@@ -89,7 +89,7 @@ def check():
 
 def make_note(i, j, n):
     if not puzzle_array[i, j]:
-        notes[i, j] = notes[i, j] ^ {n}
+        notes[i, j] = notes.get((i, j), set()) ^ {n}
 
 
 def draw_digit(i, j, n, color_func=lambda x: x):
@@ -152,9 +152,6 @@ def draw(cursor_i, cursor_j):
         else:
             draw_digit(i, j, n)
 
-    # highlight selected cell
-    highlight_cell(cursor_i, cursor_j, t.yellow)
-
     # highlight other cells with same value
     target = board_array[cursor_i, cursor_j]
     if target:
@@ -162,6 +159,9 @@ def draw(cursor_i, cursor_j):
         for cell in cells:
             if (i, j) != tuple(cell):
                 highlight_cell(*cell, t.magenta)
+
+    # highlight selected cell
+    highlight_cell(cursor_i, cursor_j, t.green if notes_mode else t.yellow)
 
     # draw notes
     for cell, note in notes.items():
@@ -188,7 +188,7 @@ board_array = puzzle_array.copy()
 
 board_grid = BLANK_BOARD.splitlines()
 
-notes = {(0, 0): {1, 2, 3, 4, 5, 6, 7, 8, 9}}
+notes = {}
 puzzle_entries = {}
 player_entries = {}
 for i in range(9):
