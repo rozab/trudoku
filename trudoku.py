@@ -56,13 +56,13 @@ PUZZLE = "0020005000107050204000900070490007308010304090360002102000800040809020
 FONT = "straight"
 
 
-def set_cell(n, i, j):
+def set_cell(i, j, n):
     if not puzzle_array[i, j]:
         # update array
         board_array[i, j] = n
         # update dict
         if n == 0:
-            del player_entries[(i, j)]
+            player_entries.pop((i, j), None)
         else:
             player_entries[(i, j)] = n
 
@@ -87,16 +87,22 @@ def check():
     return bad_cells
 
 
+def make_note(i, j, n):
+    if not puzzle_array[i, j]:
+        notes[i, j] = notes[i, j] ^ {n}
+
+
 def draw_digit(i, j, n, color_func=lambda x: x):
-    global hgap, vgap
+    # get coords for top left of cell interior
+    u, v = i * 4 + 1 + vgap, j * 8 + 1 + hgap
+
     digit = get_digit(FONT, n)
     for line_no, line in enumerate(digit):
-        print(t.move(i * 4 + 1 + vgap + line_no, j * 8 + 1 + hgap) + color_func(line))
+        print(t.move(u + line_no, v) + color_func(line))
 
 
 def highlight_cell(i, j, color_func):
-    global hgap, vgap
-    # coords for top left of cell border
+    # relative coords for top left of cell border
     u, v = i * 4, j * 8
     # top
     s = board_grid[u][v + 1 : v + 8]
@@ -112,8 +118,16 @@ def highlight_cell(i, j, color_func):
         print(t.move(u + x + vgap, v + 8 + hgap) + color_func(right))
 
 
+def draw_note(i, j, nums):
+    # get coords for top left of cell interior
+    u, v = i * 4 + 1 + vgap, j * 8 + 2 + hgap
+
+    for n in range(0, 9):
+        if n + 1 in nums:
+            print(t.move(u + n // 3, v + 2 * (n % 3)) + str(n + 1))
+
+
 def draw(cursor_i, cursor_j):
-    global hgap, vgap
     drawn_cells = set()
     bad_cells = check()
     t.clear()
@@ -149,6 +163,11 @@ def draw(cursor_i, cursor_j):
             if (i, j) != tuple(cell):
                 highlight_cell(*cell, t.magenta)
 
+    # draw notes
+    for cell, note in notes.items():
+        if cell not in drawn_cells:
+            draw_note(*cell, note)
+
 
 def move_cursor(val, i, j):
     if val == "k" or val.name == "KEY_UP":
@@ -169,6 +188,7 @@ board_array = puzzle_array.copy()
 
 board_grid = BLANK_BOARD.splitlines()
 
+notes = {(0, 0): {1, 2, 3, 4, 5, 6, 7, 8, 9}}
 puzzle_entries = {}
 player_entries = {}
 for i in range(9):
@@ -182,6 +202,7 @@ with t.fullscreen(), t.hidden_cursor(), t.cbreak():
     vgap = (t.height - 37) // 2
     i, j = 0, 0
     val = ""
+    notes_mode = False
     while val != "q":
         draw(i, j)
         val = t.inkey()
@@ -194,7 +215,12 @@ with t.fullscreen(), t.hidden_cursor(), t.cbreak():
             j = max(j - 1, 0)
         elif val == "l" or val.name == "KEY_RIGHT":
             j = min(j + 1, 8)
+        elif val == " ":
+            notes_mode = not notes_mode
         elif val in "0123456789":
-            set_cell(int(val), i, j)
+            if notes_mode:
+                make_note(i, j, int(val))
+            else:
+                set_cell(i, j, int(val))
         elif val == "x":
-            set_cell(0, i, j)
+            set_cell(i, j, 0)
