@@ -122,7 +122,7 @@ t = Terminal()
 puzzle_array = np.fromiter(PUZZLE, dtype=int).reshape([9,9]).T
 board_array = puzzle_array.copy()
 
-board_display = np.array(list(BLANK_BOARD), dtype="U16").reshape([19,37])
+board_display = np.fromiter(list(BLANK_BOARD), dtype="U16").reshape([19,37])
 
 for i in range(9):
     for j in range(9):
@@ -146,5 +146,5 @@ with t.fullscreen(), t.hidden_cursor(), t.cbreak():
             j = min(j+1, 8)
         elif val in "0123456789":
             set_cell(int(val), j, i)
-        elif val == "c":
+        elif val == "x":
             set_cell(0, j, i)
