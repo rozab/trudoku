@@ -5,44 +5,44 @@ import numpy as np
 from blessed import Terminal
 from figlet_digits import get_digit
 
-BLANK_BOARD = "\
-╔═══════╤═══════╤═══════╦═══════╤═══════╤═══════╦═══════╤═══════╤═══════╗\
-║       │       │       ║       │       │       ║       │       │       ║\
-║       │       │       ║       │       │       ║       │       │       ║\
-║       │       │       ║       │       │       ║       │       │       ║\
-╟───────┼───────┼───────╫───────┼───────┼───────╫───────┼───────┼───────╢\
-║       │       │       ║       │       │       ║       │       │       ║\
-║       │       │       ║       │       │       ║       │       │       ║\
-║       │       │       ║       │       │       ║       │       │       ║\
-╟───────┼───────┼───────╫───────┼───────┼───────╫───────┼───────┼───────╢\
-║       │       │       ║       │       │       ║       │       │       ║\
-║       │       │       ║       │       │       ║       │       │       ║\
-║       │       │       ║       │       │       ║       │       │       ║\
-╠═══════╪═══════╪═══════╬═══════╪═══════╪═══════╬═══════╪═══════╪═══════╣\
-║       │       │       ║       │       │       ║       │       │       ║\
-║       │       │       ║       │       │       ║       │       │       ║\
-║       │       │       ║       │       │       ║       │       │       ║\
-╟───────┼───────┼───────╫───────┼───────┼───────╫───────┼───────┼───────╢\
-║       │       │       ║       │       │       ║       │       │       ║\
-║       │       │       ║       │       │       ║       │       │       ║\
-║       │       │       ║       │       │       ║       │       │       ║\
-╟───────┼───────┼───────╫───────┼───────┼───────╫───────┼───────┼───────╢\
-║       │       │       ║       │       │       ║       │       │       ║\
-║       │       │       ║       │       │       ║       │       │       ║\
-║       │       │       ║       │       │       ║       │       │       ║\
-╠═══════╪═══════╪═══════╬═══════╪═══════╪═══════╬═══════╪═══════╪═══════╣\
-║       │       │       ║       │       │       ║       │       │       ║\
-║       │       │       ║       │       │       ║       │       │       ║\
-║       │       │       ║       │       │       ║       │       │       ║\
-╟───────┼───────┼───────╫───────┼───────┼───────╫───────┼───────┼───────╢\
-║       │       │       ║       │       │       ║       │       │       ║\
-║       │       │       ║       │       │       ║       │       │       ║\
-║       │       │       ║       │       │       ║       │       │       ║\
-╟───────┼───────┼───────╫───────┼───────┼───────╫───────┼───────┼───────╢\
-║       │       │       ║       │       │       ║       │       │       ║\
-║       │       │       ║       │       │       ║       │       │       ║\
-║       │       │       ║       │       │       ║       │       │       ║\
-╚═══════╧═══════╧═══════╩═══════╧═══════╧═══════╩═══════╧═══════╧═══════╝"
+BLANK_BOARD = """\
+╔═══════╤═══════╤═══════╦═══════╤═══════╤═══════╦═══════╤═══════╤═══════╗
+║       │       │       ║       │       │       ║       │       │       ║
+║       │       │       ║       │       │       ║       │       │       ║
+║       │       │       ║       │       │       ║       │       │       ║
+╟───────┼───────┼───────╫───────┼───────┼───────╫───────┼───────┼───────╢
+║       │       │       ║       │       │       ║       │       │       ║
+║       │       │       ║       │       │       ║       │       │       ║
+║       │       │       ║       │       │       ║       │       │       ║
+╟───────┼───────┼───────╫───────┼───────┼───────╫───────┼───────┼───────╢
+║       │       │       ║       │       │       ║       │       │       ║
+║       │       │       ║       │       │       ║       │       │       ║
+║       │       │       ║       │       │       ║       │       │       ║
+╠═══════╪═══════╪═══════╬═══════╪═══════╪═══════╬═══════╪═══════╪═══════╣
+║       │       │       ║       │       │       ║       │       │       ║
+║       │       │       ║       │       │       ║       │       │       ║
+║       │       │       ║       │       │       ║       │       │       ║
+╟───────┼───────┼───────╫───────┼───────┼───────╫───────┼───────┼───────╢
+║       │       │       ║       │       │       ║       │       │       ║
+║       │       │       ║       │       │       ║       │       │       ║
+║       │       │       ║       │       │       ║       │       │       ║
+╟───────┼───────┼───────╫───────┼───────┼───────╫───────┼───────┼───────╢
+║       │       │       ║       │       │       ║       │       │       ║
+║       │       │       ║       │       │       ║       │       │       ║
+║       │       │       ║       │       │       ║       │       │       ║
+╠═══════╪═══════╪═══════╬═══════╪═══════╪═══════╬═══════╪═══════╪═══════╣
+║       │       │       ║       │       │       ║       │       │       ║
+║       │       │       ║       │       │       ║       │       │       ║
+║       │       │       ║       │       │       ║       │       │       ║
+╟───────┼───────┼───────╫───────┼───────┼───────╫───────┼───────┼───────╢
+║       │       │       ║       │       │       ║       │       │       ║
+║       │       │       ║       │       │       ║       │       │       ║
+║       │       │       ║       │       │       ║       │       │       ║
+╟───────┼───────┼───────╫───────┼───────┼───────╫───────┼───────┼───────╢
+║       │       │       ║       │       │       ║       │       │       ║
+║       │       │       ║       │       │       ║       │       │       ║
+║       │       │       ║       │       │       ║       │       │       ║
+╚═══════╧═══════╧═══════╩═══════╧═══════╧═══════╩═══════╧═══════╧═══════╝"""
 
 # Lists of lists of tuples, containing coords of cells to check in each group
 ROW_GROUPS = [[(i, j) for j in range(9)] for i in range(9)]
@@ -60,9 +60,11 @@ def set_cell(n, i, j):
     if not puzzle_array[i, j]:
         # update array
         board_array[i, j] = n
-        # update display
-        s = str(n) if n != 0 else " "
-        board_display[2 * j + 1][4 * i + 2] = s
+        # update dict
+        if n == 0:
+            del player_entries[(i, j)]
+        else:
+            player_entries[(i, j)] = n
 
 
 def check():
@@ -92,30 +94,33 @@ def draw_digit(i, j, n, color_func=lambda x: x):
         print(t.move(i * 4 + 1 + vgap + line_no, j * 8 + 1 + hgap) + color_func(line))
 
 
-# def show_cursor(board, i, j):
-#     # highlight current cell
-#     highlight_cell(board, t.yellow, i, j)
-#     # highlight other cells with same value
-#     target = board_array[j, i]
-#     if target:
-#         cells = np.argwhere(board_array == target)
-#         with t.location(0, 0):
-#             print(cells)
-#         for cell in cells:
-#             if (j, i) != tuple(cell):
-#                 highlight_cell(board, t.magenta, cell[1], cell[0])
+def highlight_cell(i, j, color_func):
+    global hgap, vgap
+    # coords for top left of cell border
+    u, v = i * 4, j * 8
+    # top
+    s = board_grid[u][v + 1 : v + 8]
+    print(t.move(u + vgap, v + 1 + hgap) + color_func(s))
+    # bottom
+    s = board_grid[u + 4][v + 1 : v + 8]
+    print(t.move(u + 4 + vgap, v + 1 + hgap) + color_func(s))
+    # sides
+    for x in range(1, 4):
+        left = board_grid[u + x][v]
+        print(t.move(u + x + vgap, v + hgap) + color_func(left))
+        right = board_grid[u + x][v + 8]
+        print(t.move(u + x + vgap, v + 8 + hgap) + color_func(right))
 
 
-def draw(i, j):
+def draw(cursor_i, cursor_j):
     global hgap, vgap
     drawn_cells = set()
     bad_cells = check()
     t.clear()
 
     # draw the grid
-    lines = ["".join(l) for l in board_grid]
-    for i, l in enumerate(lines):
-        print(t.move(i + vgap, hgap) + l)
+    for line_no, line in enumerate(board_grid):
+        print(t.move(line_no + vgap, hgap) + line)
 
     # draw the numbers that were given by the puzzle
     for (i, j), n in puzzle_entries.items():
@@ -126,12 +131,6 @@ def draw(i, j):
             draw_digit(i, j, n, color_func=t.blue)
 
     # draw the numbers added by the user
-    player_entries = {}
-    for i in range(9):
-        for j in range(9):
-            n = puzzle_array[i][j]
-            if n != 0:
-                player_entries[(i, j)] = n
     for (i, j), n in player_entries.items():
         drawn_cells.add((i, j))
         if (i, j) in bad_cells:
@@ -139,7 +138,18 @@ def draw(i, j):
         else:
             draw_digit(i, j, n)
 
-    # show_cursor(colored_board, i, j)
+    # highlight selected cell
+    highlight_cell(cursor_i, cursor_j, t.yellow)
+
+    # highlight other cells with same value
+    target = board_array[cursor_i, cursor_j]
+    if target:
+        cells = np.argwhere(board_array == target)
+        with t.location(0, 0):
+            print(cells)
+        for cell in cells:
+            if (i, j) != tuple(cell):
+                highlight_cell(*cell, t.magenta)
 
 
 def move_cursor(val, i, j):
@@ -159,9 +169,10 @@ t = Terminal()
 puzzle_array = np.fromiter(PUZZLE, dtype=int).reshape([9, 9]).T
 board_array = puzzle_array.copy()
 
-board_grid = np.fromiter(list(BLANK_BOARD), dtype="U32").reshape([37, 73])
+board_grid = BLANK_BOARD.splitlines()
 
 puzzle_entries = {}
+player_entries = {}
 for i in range(9):
     for j in range(9):
         n = puzzle_array[i][j]
@@ -186,6 +197,6 @@ with t.fullscreen(), t.hidden_cursor(), t.cbreak():
         elif val == "l" or val.name == "KEY_RIGHT":
             j = min(j + 1, 8)
         elif val in "0123456789":
-            set_cell(int(val), j, i)
+            set_cell(int(val), i, j)
         elif val == "x":
-            set_cell(0, j, i)
+            set_cell(0, i, j)
