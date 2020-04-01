@@ -1,3 +1,10 @@
+# The SmShadow font was originally by Glenn Chappell, as bundled with figlet
+# The Straight font was apparently by Bas Meijer,
+# meijer@info.win.tue.nl bas@damek.kth.se
+# idk I found it on http://patorjk.com/software/taag
+# it's probably at least 20 years old
+
+
 def get_digit(font, n):
     """Returns a list of 3 strings, each of length 7,
     each representing a line in the ascii digit."""
