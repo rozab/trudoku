@@ -128,9 +128,13 @@ def draw_note(i, j, nums):
 
 
 def draw(cursor_i, cursor_j):
+    if vgap < 0 or hgap < 0:
+        print(t.home + "Please resize terminal to at least 37x73")
+        return
+
     drawn_cells = set()
     bad_cells = check()
-    t.clear()
+    print(t.clear)
 
     # draw the grid
     for line_no, line in enumerate(board_grid):
@@ -181,7 +185,16 @@ def move_cursor(val, i, j):
     return i, j
 
 
+def on_resize(*args):
+    global hgap, vgap
+    hgap = (t.width - 73) // 2
+    vgap = (t.height - 37) // 2
+    resized = True
+
+
 t = Terminal()
+
+signal.signal(signal.SIGWINCH, on_resize)
 
 puzzle_array = np.fromiter(PUZZLE, dtype=int).reshape([9, 9])
 board_array = puzzle_array.copy()
@@ -203,11 +216,15 @@ with t.fullscreen(), t.hidden_cursor(), t.cbreak():
     i, j = 0, 0
     val = ""
     notes_mode = False
+    resized = False
     while val != "q":
         draw(i, j)
-        val = t.inkey()
+        val = t.inkey(timeout=0.5)
 
-        if val == "k" or val.name == "KEY_UP":
+        if val == "":
+            if resized:
+                draw(i, j)
+        elif val == "k" or val.name == "KEY_UP":
             i = max(i - 1, 0)
         elif val == "j" or val.name == "KEY_DOWN":
             i = min(i + 1, 8)
