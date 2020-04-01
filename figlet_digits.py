@@ -2,7 +2,6 @@
 # The Straight font was apparently by Bas Meijer,
 # meijer@info.win.tue.nl bas@damek.kth.se
 # idk I found it on http://patorjk.com/software/taag
-# it's probably at least 20 years old
 
 
 def get_digit(font, n):

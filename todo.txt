@@ -2,4 +2,5 @@
 - add win condition
 - figure out behaviour for loading games and tracking wins
 - add settings, via flags, rc file and gui
-- revert to smaller grid when using small window
+- write documentation for --help flag
+- make modal keybinds help popup
