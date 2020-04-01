@@ -4,6 +4,7 @@ from collections import namedtuple
 import numpy as np
 from blessed import Terminal
 from figlet_digits import get_digit
+from arg_parser import parser
 
 BLANK_BOARD = """\
 ╔═══════╤═══════╤═══════╦═══════╤═══════╤═══════╦═══════╤═══════╤═══════╗
@@ -191,6 +192,11 @@ def on_resize(*args):
     vgap = (t.height - 37) // 2
     resized = True
 
+
+args = parser.parse_args()
+FONT = args.font
+if args.puzzle:
+    PUZZLE = args.puzzle
 
 t = Terminal()
 
