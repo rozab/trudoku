@@ -145,8 +145,6 @@ def draw(cursor_i, cursor_j):
     target = board_array[cursor_i, cursor_j]
     if target:
         cells = np.argwhere(board_array == target)
-        with t.location(0, 0):
-            print(cells)
         for cell in cells:
             if (i, j) != tuple(cell):
                 highlight_cell(*cell, t.magenta)
@@ -166,7 +164,7 @@ def move_cursor(val, i, j):
 
 t = Terminal()
 
-puzzle_array = np.fromiter(PUZZLE, dtype=int).reshape([9, 9]).T
+puzzle_array = np.fromiter(PUZZLE, dtype=int).reshape([9, 9])
 board_array = puzzle_array.copy()
 
 board_grid = BLANK_BOARD.splitlines()
