@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-from blessed import Terminal
-import numpy as np
-from figlet_digits import get_digit
 import signal
+from collections import namedtuple
+import numpy as np
+from blessed import Terminal
+from figlet_digits import get_digit
 
 BLANK_BOARD = "\
 ╔═══════╤═══════╤═══════╦═══════╤═══════╤═══════╦═══════╤═══════╤═══════╗\
@@ -52,6 +53,7 @@ BOX_GROUPS = [
 ALL_GROUPS = ROW_GROUPS + COLUMN_GROUPS + BOX_GROUPS
 
 PUZZLE = "002000500010705020400090007049000730801030409036000210200080004080902060007000800"
+FONT = "straight"
 
 
 def set_cell(n, i, j):
@@ -83,53 +85,61 @@ def check():
     return bad_cells
 
 
-def highlight_conflicts(board, bad_cells):
-    for i, j in bad_cells:
-        # override other styling
-        val = str(board_array[i, j])
-        board[2 * j + 1][4 * i + 2] = t.bold_red(val)
+def draw_digit(i, j, n, color_func=lambda x: x):
+    global hgap, vgap
+    digit = get_digit(FONT, n)
+    for line_no, line in enumerate(digit):
+        print(t.move(i * 4 + 1 + vgap + line_no, j * 8 + 1 + hgap) + color_func(line))
 
 
-def show_cursor(board, i, j):
-    # highlight current cell
-    highlight_cell(board, t.yellow, i, j)
-    # highlight other cells with same value
-    target = board_array[j, i]
-    if target:
-        cells = np.argwhere(board_array == target)
-        with t.location(0, 0):
-            print(cells)
-        for cell in cells:
-            if (j, i) != tuple(cell):
-                highlight_cell(board, t.magenta, cell[1], cell[0])
-
-
-def highlight_cell(board, color, i, j):
-    # coords for top left of square
-    u, v = i * 2, j * 4
-    # top
-    board[u][v + 1] = color + board[u][v + 1]
-    board[u][v + 3] += t.normal
-    # sides
-    board[u + 1][v] = color(board[u + 1][v])
-    board[u + 1][v + 4] = color(board[u + 1][v + 4])
-    # bottom
-    board[u + 2][v + 1] = color + board[u + 2][v + 1]
-    board[u + 2][v + 3] += t.normal
+# def show_cursor(board, i, j):
+#     # highlight current cell
+#     highlight_cell(board, t.yellow, i, j)
+#     # highlight other cells with same value
+#     target = board_array[j, i]
+#     if target:
+#         cells = np.argwhere(board_array == target)
+#         with t.location(0, 0):
+#             print(cells)
+#         for cell in cells:
+#             if (j, i) != tuple(cell):
+#                 highlight_cell(board, t.magenta, cell[1], cell[0])
 
 
 def draw(i, j):
-    width, height = t.width, t.height
-    hgap = (width - 37) // 2
-    vgap = (height - 19) // 2
-    colored_board = board_display.copy()
-    highlight_conflicts(colored_board, check())
-    show_cursor(colored_board, i, j)
-    lines = ["".join(l) for l in colored_board]
-
+    global hgap, vgap
+    drawn_cells = set()
+    bad_cells = check()
     t.clear()
+
+    # draw the grid
+    lines = ["".join(l) for l in board_grid]
     for i, l in enumerate(lines):
         print(t.move(i + vgap, hgap) + l)
+
+    # draw the numbers that were given by the puzzle
+    for (i, j), n in puzzle_entries.items():
+        drawn_cells.add((i, j))
+        if (i, j) in bad_cells:
+            draw_digit(i, j, n, color_func=t.bold_red)
+        else:
+            draw_digit(i, j, n, color_func=t.blue)
+
+    # draw the numbers added by the user
+    player_entries = {}
+    for i in range(9):
+        for j in range(9):
+            n = puzzle_array[i][j]
+            if n != 0:
+                player_entries[(i, j)] = n
+    for (i, j), n in player_entries.items():
+        drawn_cells.add((i, j))
+        if (i, j) in bad_cells:
+            draw_digit(i, j, n, color_func=t.bold_red)
+        else:
+            draw_digit(i, j, n)
+
+    # show_cursor(colored_board, i, j)
 
 
 def move_cursor(val, i, j):
@@ -149,15 +159,18 @@ t = Terminal()
 puzzle_array = np.fromiter(PUZZLE, dtype=int).reshape([9, 9]).T
 board_array = puzzle_array.copy()
 
-board_display = np.fromiter(list(BLANK_BOARD), dtype="U32").reshape([19, 37])
+board_grid = np.fromiter(list(BLANK_BOARD), dtype="U32").reshape([37, 73])
 
+puzzle_entries = {}
 for i in range(9):
     for j in range(9):
-        n = board_array[i][j]
+        n = puzzle_array[i][j]
         if n != 0:
-            board_display[2 * j + 1][4 * i + 2] = t.blue(str(n))
+            puzzle_entries[(i, j)] = n
 
 with t.fullscreen(), t.hidden_cursor(), t.cbreak():
+    hgap = (t.width - 73) // 2
+    vgap = (t.height - 37) // 2
     i, j = 0, 0
     val = ""
     while val != "q":
