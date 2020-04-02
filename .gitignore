@@ -131,3 +131,6 @@ dmypy.json
 # vscode project
 .vscode/*
 *.code-workspace
+
+# poetry
+poetry.lock
