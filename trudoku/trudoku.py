@@ -69,16 +69,6 @@ SMALL_BLANK_BOARD = """\
 ╚═══╧═══╧═══╩═══╧═══╧═══╩═══╧═══╧═══╝"""
 small_board_grid = SMALL_BLANK_BOARD.splitlines()
 
-# Lists of lists of tuples, containing coords of cells to check in each group
-ROW_GROUPS = [[(i, j) for j in range(9)] for i in range(9)]
-COLUMN_GROUPS = [[(i, j) for i in range(9)] for j in range(9)]
-BOX_GROUPS = [
-    [(i * 3 + u, j * 3 + v) for u in range(3) for v in range(3)]
-    for i in range(3)
-    for j in range(3)
-]
-ALL_GROUPS = ROW_GROUPS + COLUMN_GROUPS + BOX_GROUPS
-
 PUZZLE = (
     "017369824849712650623854719498523167365147298172986435781635942256498371934271586"
 )
@@ -226,7 +216,7 @@ def main():
 
     signal.signal(signal.SIGWINCH, on_resize)
 
-    b = Board(PUZZLE)
+    b = Board(PUZZLE_STRING)
 
     with t.fullscreen(), t.hidden_cursor(), t.cbreak():
         on_resize()
