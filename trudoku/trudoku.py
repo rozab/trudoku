@@ -4,6 +4,7 @@ import numpy as np
 from blessed import Terminal
 from figlet_digits import get_digit
 from arg_parser import parser
+from board import Board
 
 BLANK_BOARD = """\
 ╔═══════╤═══════╤═══════╦═══════╤═══════╤═══════╦═══════╤═══════╤═══════╗
@@ -77,42 +78,6 @@ PUZZLE = "0020005000107050204000900070490007308010304090360002102000800040809020
 FONT = "straight"
 
 
-def set_cell(i, j, n):
-    if not puzzle_array[i, j]:
-        # update array
-        board_array[i, j] = n
-        # update dict
-        if n == 0:
-            player_entries.pop((i, j), None)
-        else:
-            player_entries[(i, j)] = n
-
-
-def check():
-    bad_cells = set()
-    for group in ALL_GROUPS:
-        group_values = set()
-        repeated_values = set()
-        for cell in group:
-            n = board_array[cell]
-            if n == 0:
-                continue
-            elif n not in group_values:
-                group_values.add(n)
-            else:
-                repeated_values.add(n)
-        for cell in group:
-            n = board_array[cell]
-            if n in repeated_values:
-                bad_cells.add(cell)
-    return bad_cells
-
-
-def make_note(i, j, n):
-    if not puzzle_array[i, j]:
-        notes[i, j] = notes.get((i, j), set()) ^ {n}
-
-
 def draw_digit(i, j, n, color_func=lambda x: x):
     if compact_view:
         u, v = 2 * i + 1 + vgap, 4 * j + 2 + hgap
@@ -169,7 +134,7 @@ def draw_cell_notes(i, j, nums):
 
 def draw_all_notes(cursor_i, cursor_j, drawn_cells):
     if compact_view:
-        nums = notes.get((cursor_i, cursor_j), set())
+        nums = b.get_note((cursor_i, cursor_j), set())
         status = "Notes:  "
         for i in range(1, 10):
             if i in nums:
@@ -178,7 +143,7 @@ def draw_all_notes(cursor_i, cursor_j, drawn_cells):
                 status += t.bright_black(str(i)) + "  "
         print(t.move(19 + vgap + min(vgap, 2), 2 + hgap) + status, end="")
     else:
-        for cell, note in notes.items():
+        for cell, note in b.get_all_notes().items():
             if cell not in drawn_cells:
                 draw_cell_notes(*cell, note)
 
@@ -190,14 +155,14 @@ def draw(cursor_i, cursor_j):
         return
 
     drawn_cells = set()
-    bad_cells = check()
+    bad_cells = b.check()
 
     # draw the grid
     for line_no, line in enumerate(small_board_grid if compact_view else board_grid):
         print(t.move(line_no + vgap, hgap) + line, end="")
 
     # draw the numbers that were given by the puzzle
-    for (i, j), n in puzzle_entries.items():
+    for (i, j), n in b.puzzle_entries.items():
         drawn_cells.add((i, j))
         if (i, j) in bad_cells:
             draw_digit(i, j, n, color_func=t.bold_red)
@@ -205,7 +170,7 @@ def draw(cursor_i, cursor_j):
             draw_digit(i, j, n, color_func=t.blue)
 
     # draw the numbers added by the user
-    for (i, j), n in player_entries.items():
+    for (i, j), n in b.player_entries.items():
         drawn_cells.add((i, j))
         if (i, j) in bad_cells:
             draw_digit(i, j, n, color_func=t.bold_red)
@@ -214,13 +179,9 @@ def draw(cursor_i, cursor_j):
 
     draw_all_notes(cursor_i, cursor_j, drawn_cells)
 
-    # highlight other cells with same value
-    target = board_array[cursor_i, cursor_j]
-    if target:
-        cells = np.argwhere(board_array == target)
-        for cell in cells:
-            if (i, j) != tuple(cell):
-                highlight_cell(*cell, t.magenta)
+    # highlight cells with same value
+    target = b[cursor_i, cursor_j]
+    [highlight_cell(*c, t.magenta) for c in b.get_all_same(target)]
 
     # highlight selected cell
     highlight_cell(cursor_i, cursor_j, t.green if notes_mode else t.yellow)
@@ -228,18 +189,6 @@ def draw(cursor_i, cursor_j):
     # draw status bar
     if notes_mode:
         print(t.home + t.green("-- notes mode --  (space to cancel)"))
-
-
-def move_cursor(val, i, j):
-    if val == "k" or val.name == "KEY_UP":
-        i = max(i - 1, 0)
-    elif val == "j" or val.name == "KEY_DOWN":
-        i = min(i + 1, 8)
-    elif val == "h" or val.name == "KEY_LEFT":
-        j = max(j - 1, 0)
-    elif val == "l" or val.name == "KEY_RIGHT":
-        j = min(j + 1, 8)
-    return i, j
 
 
 def on_resize(*args):
@@ -264,32 +213,17 @@ t = Terminal()
 
 signal.signal(signal.SIGWINCH, on_resize)
 
-puzzle_array = np.fromiter(PUZZLE, dtype=int).reshape([9, 9])
-board_array = puzzle_array.copy()
-
 board_grid = BLANK_BOARD.splitlines()
 small_board_grid = SMALL_BLANK_BOARD.splitlines()
 
-compact_view = False
-notes = {}
-puzzle_entries = {}
-player_entries = {}
-for i in range(9):
-    for j in range(9):
-        n = puzzle_array[i][j]
-        if n != 0:
-            puzzle_entries[(i, j)] = n
+b = Board(PUZZLE)
 
 with t.fullscreen(), t.hidden_cursor(), t.cbreak():
     on_resize()
-    resized = False
-    i, j = 0, 0
-    val = ""
     notes_mode = False
+    i, j = 0, 0
     draw(i, j)
-    while val != "q":
-        val = t.inkey(esc_delay=0, timeout=0.5)
-
+    while (val := t.inkey(esc_delay=0, timeout=0.5)) != "q":
         if val == "":
             if not resized:
                 continue
@@ -307,11 +241,11 @@ with t.fullscreen(), t.hidden_cursor(), t.cbreak():
             notes_mode = False
         elif val in "0123456789":
             if notes_mode:
-                make_note(i, j, int(val))
+                b.make_note((i, j), int(val))
             else:
-                set_cell(i, j, int(val))
+                b[i, j] = int(val)
         elif val == "x":
-            set_cell(i, j, 0)
+            b[i, j] = 0
 
         draw(i, j)
         resized = False
