@@ -8,9 +8,9 @@ def get_digit(font, n):
     """Returns a list of 3 strings, each of length 7,
     each representing a line in the ascii digit."""
     if font == "smshadow":
-        return smshadow[n-1]
+        return smshadow[n - 1]
     elif font == "straight":
-        return straight[n-1]
+        return straight[n - 1]
 
 
 smshadow = [
