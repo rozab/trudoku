@@ -7,7 +7,7 @@ parser = argparse.ArgumentParser(
 parser.add_argument(
     "-c",
     "--compact",
-    help="force compact mode",
+    help="force compact view",
     default=False,
     action="store_true",
     dest="force_compact",

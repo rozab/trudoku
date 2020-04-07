@@ -2,10 +2,10 @@
 import signal
 import numpy as np
 from blessed import Terminal
-from figlet_digits import get_digit
-from arg_parser import parser
-from board import Board
-from modals import show_help, show_victory
+from trudoku.figlet_digits import get_digit
+from trudoku.arg_parser import parser
+from trudoku.board import Board
+from trudoku.modals import show_help, show_victory
 
 BLANK_BOARD = """\
 ╔═══════╤═══════╤═══════╦═══════╤═══════╤═══════╦═══════╤═══════╤═══════╗
@@ -45,6 +45,7 @@ BLANK_BOARD = """\
 ║       │       │       ║       │       │       ║       │       │       ║
 ║       │       │       ║       │       │       ║       │       │       ║
 ╚═══════╧═══════╧═══════╩═══════╧═══════╧═══════╩═══════╧═══════╧═══════╝"""
+board_grid = BLANK_BOARD.splitlines()
 
 SMALL_BLANK_BOARD = """\
 ╔═══╤═══╤═══╦═══╤═══╤═══╦═══╤═══╤═══╗
@@ -66,6 +67,7 @@ SMALL_BLANK_BOARD = """\
 ╟───┼───┼───╫───┼───┼───╫───┼───┼───╢
 ║   │   │   ║   │   │   ║   │   │   ║
 ╚═══╧═══╧═══╩═══╧═══╧═══╩═══╧═══╧═══╝"""
+small_board_grid = SMALL_BLANK_BOARD.splitlines()
 
 # Lists of lists of tuples, containing coords of cells to check in each group
 ROW_GROUPS = [[(i, j) for j in range(9)] for i in range(9)]
@@ -78,7 +80,7 @@ BOX_GROUPS = [
 ALL_GROUPS = ROW_GROUPS + COLUMN_GROUPS + BOX_GROUPS
 
 PUZZLE = (
-    "017369824849712653623854719498523167365147298172986435781635942256498371934271586"
+    "017369824849712650623854719498523167365147298172986435781635942256498371934271586"
 )
 
 
@@ -212,55 +214,54 @@ def on_resize(*args):
     t.resized = True
 
 
-args = parser.parse_args()
-FONT = args.font
-if args.puzzle:
-    PUZZLE = args.puzzle
-FORCE_COMPACT = args.force_compact
+def main():
+    global t, b, FORCE_COMPACT, FONT, notes_mode
 
-t = Terminal()
+    args = parser.parse_args()
+    FONT = args.font
+    PUZZLE_STRING = args.puzzle if args.puzzle else PUZZLE
+    FORCE_COMPACT = args.force_compact
 
-signal.signal(signal.SIGWINCH, on_resize)
+    t = Terminal()
 
-board_grid = BLANK_BOARD.splitlines()
-small_board_grid = SMALL_BLANK_BOARD.splitlines()
+    signal.signal(signal.SIGWINCH, on_resize)
 
-b = Board(PUZZLE)
+    b = Board(PUZZLE)
 
-with t.fullscreen(), t.hidden_cursor(), t.cbreak():
-    on_resize()
-    notes_mode = False
-    i, j = 0, 0
-    draw(i, j)
-    while (val := t.inkey(esc_delay=0, timeout=0.5)) != "q":
-        if val == "":
-            if not t.resized:
-                continue
-        elif val == "k" or val.name == "KEY_UP":
-            i = max(i - 1, 0)
-        elif val == "j" or val.name == "KEY_DOWN":
-            i = min(i + 1, 8)
-        elif val == "h" or val.name == "KEY_LEFT":
-            j = max(j - 1, 0)
-        elif val == "l" or val.name == "KEY_RIGHT":
-            j = min(j + 1, 8)
-        elif val == " ":
-            notes_mode = not notes_mode
-        elif val.name == "KEY_ESCAPE":
-            notes_mode = False
-        elif val in "0123456789":
-            if notes_mode:
-                b.make_note((i, j), int(val))
-            else:
-                b[i, j] = int(val)
-        elif val == "x":
-            b[i, j] = 0
-        elif val in "?H":
-            show_help(t, lambda: draw(i, j))
-
+    with t.fullscreen(), t.hidden_cursor(), t.cbreak():
+        on_resize()
+        notes_mode = False
+        i, j = 0, 0
         draw(i, j)
-        t.resized = False
+        while (val := t.inkey(esc_delay=0, timeout=0.5)) != "q":
+            if val == "":
+                if not t.resized:
+                    continue
+            elif val == "k" or val.name == "KEY_UP":
+                i = max(i - 1, 0)
+            elif val == "j" or val.name == "KEY_DOWN":
+                i = min(i + 1, 8)
+            elif val == "h" or val.name == "KEY_LEFT":
+                j = max(j - 1, 0)
+            elif val == "l" or val.name == "KEY_RIGHT":
+                j = min(j + 1, 8)
+            elif val == " ":
+                notes_mode = not notes_mode
+            elif val.name == "KEY_ESCAPE":
+                notes_mode = False
+            elif val in "0123456789":
+                if notes_mode:
+                    b.make_note((i, j), int(val))
+                else:
+                    b[i, j] = int(val)
+            elif val == "x":
+                b[i, j] = 0
+            elif val in "?H":
+                show_help(t, lambda: draw(i, j))
 
-        if b.is_solved():
-            show_victory(t, lambda: draw(i, j))
-            break
+            draw(i, j)
+            t.resized = False
+
+            if b.is_solved():
+                show_victory(t, lambda: draw(i, j))
+                break
