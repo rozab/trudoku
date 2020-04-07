@@ -1,7 +1,17 @@
 import argparse
 
-parser = argparse.ArgumentParser(prog="Trudoku", description="ncurses sudoku game")
+parser = argparse.ArgumentParser(
+    prog="trudoku", description="Press ? inside the app for help with keybinds."
+)
 
+parser.add_argument(
+    "-c",
+    "--compact",
+    help="force compact mode",
+    default=False,
+    action="store_true",
+    dest="force_compact",
+)
 parser.add_argument(
     "-p",
     "--puzzle",

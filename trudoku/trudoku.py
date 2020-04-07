@@ -80,7 +80,6 @@ ALL_GROUPS = ROW_GROUPS + COLUMN_GROUPS + BOX_GROUPS
 PUZZLE = (
     "017369824849712653623854719498523167365147298172986435781635942256498371934271586"
 )
-FONT = "straight"
 
 
 def draw_digit(cell, n, color_func=lambda x: x):
@@ -201,7 +200,7 @@ def draw(*cursor_cell):
 
 def on_resize(*args):
     global hgap, vgap, compact_view
-    if t.width < 73 or t.height < 38:
+    if t.width < 73 or t.height < 38 or FORCE_COMPACT:
         compact_view = True
         hgap = (t.width - 37) // 2
         vgap = (t.height - 21) // 2 + 1
@@ -217,6 +216,7 @@ args = parser.parse_args()
 FONT = args.font
 if args.puzzle:
     PUZZLE = args.puzzle
+FORCE_COMPACT = args.force_compact
 
 t = Terminal()
 
