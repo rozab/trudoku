@@ -141,7 +141,7 @@ def draw_cell_notes(cell, nums):
 
 def draw_all_notes(cursor_cell, drawn_cells):
     if compact_view:
-        nums = b.get_note(cursor_cell, set())
+        nums = b.get_note(cursor_cell)
         status = "Notes:  "
         for i in range(1, 10):
             if i in nums:
@@ -199,7 +199,7 @@ def draw(*cursor_cell):
 
 
 def on_resize(*args):
-    global hgap, vgap, compact_view, resized
+    global hgap, vgap, compact_view
     if t.width < 73 or t.height < 38:
         compact_view = True
         hgap = (t.width - 37) // 2
@@ -208,7 +208,8 @@ def on_resize(*args):
         compact_view = False
         hgap = (t.width - 73) // 2
         vgap = (t.height - 37) // 2 + 1
-    resized = True
+    # tee hee let's just stick a new field on the terminal
+    t.resized = True
 
 
 args = parser.parse_args()
@@ -232,7 +233,7 @@ with t.fullscreen(), t.hidden_cursor(), t.cbreak():
     draw(i, j)
     while (val := t.inkey(esc_delay=0, timeout=0.5)) != "q":
         if val == "":
-            if not resized:
+            if not t.resized:
                 continue
         elif val == "k" or val.name == "KEY_UP":
             i = max(i - 1, 0)
@@ -255,4 +256,4 @@ with t.fullscreen(), t.hidden_cursor(), t.cbreak():
             b[i, j] = 0
 
         draw(i, j)
-        resized = False
+        t.resized = False
