@@ -2,10 +2,11 @@
 import signal
 import numpy as np
 from blessed import Terminal
-from trudoku.figlet_digits import get_digit
-from trudoku.arg_parser import parser
-from trudoku.board import Board
-from trudoku.modals import show_help, show_victory
+from .figlet_digits import get_digit
+from .arg_parser import parser
+from .board import Board
+from .modals import show_help, show_victory
+from .puzzles import get_puzzle
 
 BLANK_BOARD = """\
 ╔═══════╤═══════╤═══════╦═══════╤═══════╤═══════╦═══════╤═══════╤═══════╗
@@ -68,10 +69,6 @@ SMALL_BLANK_BOARD = """\
 ║   │   │   ║   │   │   ║   │   │   ║
 ╚═══╧═══╧═══╩═══╧═══╧═══╩═══╧═══╧═══╝"""
 small_board_grid = SMALL_BLANK_BOARD.splitlines()
-
-PUZZLE = (
-    "017369824849712650623854719498523167365147298172986435781635942256498371934271586"
-)
 
 
 def draw_digit(cell, n, color_func=lambda x: x):
@@ -209,8 +206,12 @@ def main():
 
     args = parser.parse_args()
     FONT = args.font
-    PUZZLE_STRING = args.puzzle if args.puzzle else PUZZLE
     FORCE_COMPACT = args.force_compact
+
+    if args.puzzle:
+        PUZZLE_STRING = args.puzzle
+    else:
+        PUZZLE_STRING = get_puzzle(args.difficulty)
 
     t = Terminal()
 
