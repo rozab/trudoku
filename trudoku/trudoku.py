@@ -70,15 +70,20 @@ SMALL_BLANK_BOARD = """\
 ROW_GROUPS = [[(i, j) for j in range(9)] for i in range(9)]
 COLUMN_GROUPS = [[(i, j) for i in range(9)] for j in range(9)]
 BOX_GROUPS = [
-    [(i * 3 + u, j * 3 + v) for u in range(3) for v in range(3)] for i in range(3) for j in range(3)
+    [(i * 3 + u, j * 3 + v) for u in range(3) for v in range(3)]
+    for i in range(3)
+    for j in range(3)
 ]
 ALL_GROUPS = ROW_GROUPS + COLUMN_GROUPS + BOX_GROUPS
 
-PUZZLE = "002000500010705020400090007049000730801030409036000210200080004080902060007000800"
+PUZZLE = (
+    "002000500010705020400090007049000730801030409036000210200080004080902060007000800"
+)
 FONT = "straight"
 
 
-def draw_digit(i, j, n, color_func=lambda x: x):
+def draw_digit(cell, n, color_func=lambda x: x):
+    i, j = cell
     if compact_view:
         u, v = 2 * i + 1 + vgap, 4 * j + 2 + hgap
         print(t.move(u, v) + color_func(str(n)))
@@ -91,7 +96,8 @@ def draw_digit(i, j, n, color_func=lambda x: x):
             print(t.move(u + line_no, v) + color_func(line))
 
 
-def highlight_cell(i, j, color_func):
+def highlight_cell(cell, color_func):
+    i, j = cell
     if compact_view:
         # coords for top left of square
         u, v = i * 2, j * 4
@@ -123,7 +129,8 @@ def highlight_cell(i, j, color_func):
             print(t.move(u + x + vgap, v + 8 + hgap) + color_func(right))
 
 
-def draw_cell_notes(i, j, nums):
+def draw_cell_notes(cell, nums):
+    i, j = cell
     # get coords for top left of cell interior
     u, v = i * 4 + 1 + vgap, j * 8 + 2 + hgap
 
@@ -132,9 +139,9 @@ def draw_cell_notes(i, j, nums):
             print(t.move(u + n // 3, v + 2 * (n % 3)) + str(n + 1))
 
 
-def draw_all_notes(cursor_i, cursor_j, drawn_cells):
+def draw_all_notes(cursor_cell, drawn_cells):
     if compact_view:
-        nums = b.get_note((cursor_i, cursor_j), set())
+        nums = b.get_note(cursor_cell, set())
         status = "Notes:  "
         for i in range(1, 10):
             if i in nums:
@@ -145,10 +152,10 @@ def draw_all_notes(cursor_i, cursor_j, drawn_cells):
     else:
         for cell, note in b.get_all_notes().items():
             if cell not in drawn_cells:
-                draw_cell_notes(*cell, note)
+                draw_cell_notes(cell, note)
 
 
-def draw(cursor_i, cursor_j):
+def draw(*cursor_cell):
     print(t.clear)
     if t.height < 21 or t.width < 37:
         print(t.home + "Please resize terminal to at least 37x21")
@@ -162,29 +169,29 @@ def draw(cursor_i, cursor_j):
         print(t.move(line_no + vgap, hgap) + line, end="")
 
     # draw the numbers that were given by the puzzle
-    for (i, j), n in b.puzzle_entries.items():
-        drawn_cells.add((i, j))
-        if (i, j) in bad_cells:
-            draw_digit(i, j, n, color_func=t.bold_red)
+    for cell, n in b.puzzle_entries.items():
+        drawn_cells.add(cell)
+        if cell in bad_cells:
+            draw_digit(cell, n, color_func=t.bold_red)
         else:
-            draw_digit(i, j, n, color_func=t.blue)
+            draw_digit(cell, n, color_func=t.blue)
 
     # draw the numbers added by the user
-    for (i, j), n in b.player_entries.items():
-        drawn_cells.add((i, j))
-        if (i, j) in bad_cells:
-            draw_digit(i, j, n, color_func=t.bold_red)
+    for cell, n in b.player_entries.items():
+        drawn_cells.add(cell)
+        if cell in bad_cells:
+            draw_digit(cell, n, color_func=t.bold_red)
         else:
-            draw_digit(i, j, n)
+            draw_digit(cell, n)
 
-    draw_all_notes(cursor_i, cursor_j, drawn_cells)
+    draw_all_notes(cursor_cell, drawn_cells)
 
     # highlight cells with same value
-    target = b[cursor_i, cursor_j]
-    [highlight_cell(*c, t.magenta) for c in b.get_all_same(target)]
+    target = b[cursor_cell]
+    [highlight_cell(c, t.magenta) for c in b.get_all_same(target)]
 
     # highlight selected cell
-    highlight_cell(cursor_i, cursor_j, t.green if notes_mode else t.yellow)
+    highlight_cell(cursor_cell, t.green if notes_mode else t.yellow)
 
     # draw status bar
     if notes_mode:
