@@ -5,6 +5,7 @@ from blessed import Terminal
 from figlet_digits import get_digit
 from arg_parser import parser
 from board import Board
+from modals import show_help
 
 BLANK_BOARD = """\
 ╔═══════╤═══════╤═══════╦═══════╤═══════╤═══════╦═══════╤═══════╤═══════╗
@@ -254,6 +255,8 @@ with t.fullscreen(), t.hidden_cursor(), t.cbreak():
                 b[i, j] = int(val)
         elif val == "x":
             b[i, j] = 0
+        elif val in "?H":
+            show_help(t, lambda: draw(i, j))
 
         draw(i, j)
         t.resized = False
