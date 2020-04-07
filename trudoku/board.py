@@ -5,7 +5,9 @@ import numpy as np
 ROW_GROUPS = [[(i, j) for j in range(9)] for i in range(9)]
 COLUMN_GROUPS = [[(i, j) for i in range(9)] for j in range(9)]
 BOX_GROUPS = [
-    [(i * 3 + u, j * 3 + v) for u in range(3) for v in range(3)] for i in range(3) for j in range(3)
+    [(i * 3 + u, j * 3 + v) for u in range(3) for v in range(3)]
+    for i in range(3)
+    for j in range(3)
 ]
 ALL_GROUPS = ROW_GROUPS + COLUMN_GROUPS + BOX_GROUPS
 
@@ -94,3 +96,10 @@ class Board:
             cells = np.argwhere(self.board_array == n)
             [l.append(tuple(c)) for c in cells]
         return l
+
+    def is_solved(self):
+        bad_cells = self.check()
+        if len(self.player_entries) + len(self.puzzle_entries) == 81 and not bad_cells:
+            return True
+        else:
+            return False

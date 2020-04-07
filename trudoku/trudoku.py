@@ -5,7 +5,7 @@ from blessed import Terminal
 from figlet_digits import get_digit
 from arg_parser import parser
 from board import Board
-from modals import show_help
+from modals import show_help, show_victory
 
 BLANK_BOARD = """\
 ╔═══════╤═══════╤═══════╦═══════╤═══════╤═══════╦═══════╤═══════╤═══════╗
@@ -78,7 +78,7 @@ BOX_GROUPS = [
 ALL_GROUPS = ROW_GROUPS + COLUMN_GROUPS + BOX_GROUPS
 
 PUZZLE = (
-    "002000500010705020400090007049000730801030409036000210200080004080902060007000800"
+    "017369824849712653623854719498523167365147298172986435781635942256498371934271586"
 )
 FONT = "straight"
 
@@ -173,7 +173,7 @@ def draw(*cursor_cell):
     for cell, n in b.puzzle_entries.items():
         drawn_cells.add(cell)
         if cell in bad_cells:
-            draw_digit(cell, n, color_func=t.bold_red)
+            draw_digit(cell, n, color_func=t.bold_bright_red)
         else:
             draw_digit(cell, n, color_func=t.blue)
 
@@ -181,7 +181,7 @@ def draw(*cursor_cell):
     for cell, n in b.player_entries.items():
         drawn_cells.add(cell)
         if cell in bad_cells:
-            draw_digit(cell, n, color_func=t.bold_red)
+            draw_digit(cell, n, color_func=t.bold_bright_red)
         else:
             draw_digit(cell, n)
 
@@ -260,3 +260,7 @@ with t.fullscreen(), t.hidden_cursor(), t.cbreak():
 
         draw(i, j)
         t.resized = False
+
+        if b.is_solved():
+            show_victory(t, lambda: draw(i, j))
+            break
