@@ -229,13 +229,21 @@ def main():
                 if not t.resized:
                     continue
             elif val == "k" or val.name == "KEY_UP":
-                i = max(i - 1, 0)
+                if (i := i - 1) < 0:
+                    i = 0
+                    continue
             elif val == "j" or val.name == "KEY_DOWN":
-                i = min(i + 1, 8)
+                if (i := i + 1) > 8:
+                    i = 8
+                    continue
             elif val == "h" or val.name == "KEY_LEFT":
-                j = max(j - 1, 0)
+                if (j := j - 1) < 0:
+                    j = 0
+                    continue
             elif val == "l" or val.name == "KEY_RIGHT":
-                j = min(j + 1, 8)
+                if (j := j + 1) > 8:
+                    j = 8
+                    continue
             elif val == " ":
                 notes_mode = not notes_mode
             elif val.name == "KEY_ESCAPE":
