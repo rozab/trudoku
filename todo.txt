@@ -1,7 +1,7 @@
 # TODO:
 - add win condition
+- with a nice modal
 - figure out behaviour for loading games and tracking wins
 - add settings, via flags, rc file and gui
 - write documentation for --help flag
-- make modal keybinds help popup
 - setup entry point, pypi, pipx
